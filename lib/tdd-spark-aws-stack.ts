@@ -50,7 +50,8 @@ export class TddSparkAwsStack extends Stack {
       actions: [
         "s3:ListBucket",
         "s3:*Object",
-        "glue:CreateTable"
+        "glue:CreateTable",
+        "glue:GetTable"
       ],
       resources: [
         '*'
