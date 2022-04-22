@@ -49,7 +49,8 @@ export class TddSparkAwsStack extends Stack {
       effect: Effect.ALLOW,
       actions: [
         "s3:ListBucket",
-        "s3:*Object"
+        "s3:*Object",
+        "glue:CreateTable"
       ],
       resources: [
         '*'
@@ -63,7 +64,11 @@ export class TddSparkAwsStack extends Stack {
           databaseName: 'databaseName',
           tables: [ 'test_customer_csv' ],
         }]
-      }
+      },
+      schemaChangePolicy: {
+        deleteBehavior: 'deleteBehavior',
+        updateBehavior: 'updateBehavior',
+      },
     });
 
   }
