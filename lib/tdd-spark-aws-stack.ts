@@ -14,7 +14,27 @@ export class TddSparkAwsStack extends Stack {
     super(scope, id, props);
 
     const databaseName = 'customer_database';
+    const glueRole = new Role(this, 'glueRole', {
+      roleName: 'glueCrawlerRole',
+      assumedBy: new ServicePrincipal('glue.amazonaws.com'),
+    });
+    
+    glueRole.addToPolicy(new PolicyStatement({
+      effect: Effect.ALLOW,
+      actions: [
+        "s3:ListBucket",
+        "s3:*Object",
+        "glue:CreateTable",
+        "glue:GetTable",
+        "glue:*"
+      ],
+      resources: [
+        '*'
+      ]
+    }));
 
+    glueRole.addManagedPolicy(ManagedPolicy.fromAwsManagedPolicyName("AWSGlueServiceRole"));
+    
     const database = new glue.CfnDatabase(this, 'MyCfnDatabase', {
       // catalogId: `${process.env.ACCOUNT}`,
       catalogId: `568819880158`,
@@ -40,23 +60,7 @@ export class TddSparkAwsStack extends Stack {
       },
     });
 
-    const glueRole = new Role(this, 'glueRole', {
-      roleName: 'glueCrawlerRole',
-      assumedBy: new ServicePrincipal('glue.amazonaws.com'),
-    });
-    
-    glueRole.addToPolicy(new PolicyStatement({
-      effect: Effect.ALLOW,
-      actions: [
-        "s3:ListBucket",
-        "s3:*Object",
-        "glue:CreateTable",
-        "glue:GetTable"
-      ],
-      resources: [
-        '*'
-      ]
-    }));
+    table.node.addDependency(database)
 
     const crawler = new glue.CfnCrawler(this, 'MyCfnCrawler', {
       role: glueRole.roleArn,
@@ -71,6 +75,8 @@ export class TddSparkAwsStack extends Stack {
         updateBehavior: 'LOG',
       },
     });
+
+    crawler.node.addDependency(table)
 
   }
 }
