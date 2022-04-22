@@ -66,8 +66,8 @@ export class TddSparkAwsStack extends Stack {
         }]
       },
       schemaChangePolicy: {
-        deleteBehavior: 'deleteBehavior',
-        updateBehavior: 'updateBehavior',
+        deleteBehavior: 'LOG',
+        updateBehavior: 'LOG',
       },
     });
 
