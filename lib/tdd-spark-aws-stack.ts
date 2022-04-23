@@ -45,23 +45,6 @@ export class TddSparkAwsStack extends Stack {
       },
     });
 
-    const table = new glue.CfnTable(this, 'MyCfnTable', {
-      // catalogId: `${process.env.ACCOUNT}`,
-      catalogId: '568819880158',
-      databaseName: databaseName,
-      tableInput: {
-        description: 'A test table',
-        name: 'test_customer_csv',
-        retention: 123,
-        storageDescriptor: {
-          inputFormat: 'csv',
-          location: 's3://appflow-test-ash/glue/data/customers_database/customers_csv/',
-        },
-      },
-    });
-
-    table.node.addDependency(database)
-
     const scheduleProperty: glue.CfnCrawler.ScheduleProperty = {
       scheduleExpression: 'cron(*/5 * * * *)',
     };
@@ -79,12 +62,7 @@ export class TddSparkAwsStack extends Stack {
       databaseName: databaseName,
       targets: {
         s3Targets: [{
-          // connectionName: 'test_connection',
-          // dlqEventQueueArn: 'dlqEventQueueArn',
-          // eventQueueArn: 'eventQueueArn',
-          // exclusions: ['exclusions'],
           path: 's3://appflow-test-ash/glue/data/customers_database/customers_csv/',
-          // sampleSize: 123,
         }],
       },
       schemaChangePolicy: {
@@ -93,7 +71,7 @@ export class TddSparkAwsStack extends Stack {
       },
     });
 
-    crawler.node.addDependency(table)
+    crawler.node.addDependency(database)
 
   }
 }
