@@ -40,8 +40,7 @@ export class TddSparkAwsStack extends Stack {
     glueRole.addManagedPolicy(ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSGlueServiceRole"));
     
     const database = new glue.CfnDatabase(this, 'MyCfnDatabase', {
-      // catalogId: `${process.env.ACCOUNT}`,
-      catalogId: `568819880158`,
+      catalogId: `${process.env.ACCOUNT}`,
       databaseInput: {
         description: 'A test customer database',
         locationUri: 's3://appflow-test-ash/glue/data/customers_database/',
