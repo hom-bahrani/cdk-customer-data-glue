@@ -84,6 +84,7 @@ export class TddSparkAwsStack extends Stack {
     scriptAsset.grantRead(glueRole);
 
     const job = new glue.CfnJob(this, 'Job', {
+      name: "remove-namestyle-job",
       command: {
         name: 'glueetl',
         pythonVersion: '3',
@@ -92,7 +93,6 @@ export class TddSparkAwsStack extends Stack {
       numberOfWorkers: 2,
       role: glueRole.roleArn,
       glueVersion: '2.0',
-      name: 'AwsGlueEtlSampleCdk',
       defaultArguments: {
         '--job-bookmark-option': 'job-bookmark-enable',
         '--enable-metrics': 'true',
