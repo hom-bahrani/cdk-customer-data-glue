@@ -43,7 +43,7 @@ export class TddSparkAwsStack extends Stack {
       catalogId: `${process.env.ACCOUNT}`,
       databaseInput: {
         description: 'A test customer database',
-        locationUri: 's3://appflow-test-ash/glue/data/customers_database/',
+        locationUri: 's3://<BUCKET-NAME>/glue/data/customers_database/',
         name: databaseName,
       },
     });
@@ -65,7 +65,7 @@ export class TddSparkAwsStack extends Stack {
       databaseName: databaseName,
       targets: {
         s3Targets: [{
-          path: 's3://appflow-test-ash/glue/data/customers_database/customers_csv/',
+          path: 's3://<BUCKET-NAME>/glue/data/customers_database/customers_csv/',
         }],
       },
       schemaChangePolicy: {
