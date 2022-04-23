@@ -8,12 +8,16 @@ import {
   PolicyStatement,
   Effect
 } from 'aws-cdk-lib/aws-iam';
+import { Asset } from 'aws-cdk-lib/aws-s3-assets';
+import * as path from 'path';
 
 export class TddSparkAwsStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
     const databaseName = 'customer_database';
+    const tableName = 'customers_csv';
+
     const glueRole = new Role(this, 'glueRole', {
       roleName: 'glueCrawlerRole',
       assumedBy: new ServicePrincipal('glue.amazonaws.com'),
@@ -72,6 +76,35 @@ export class TddSparkAwsStack extends Stack {
     });
 
     crawler.node.addDependency(database)
+
+    const scriptAsset = new Asset(this, 'Script', {
+      path: path.join(__dirname, '..', 'scripts', 'job1.py'),
+    });
+
+    scriptAsset.grantRead(glueRole);
+
+    const job = new glue.CfnJob(this, 'Job', {
+      command: {
+        name: 'glueetl',
+        pythonVersion: '3',
+        scriptLocation: `s3://${scriptAsset.s3BucketName}/${scriptAsset.s3ObjectKey}`,
+      },
+      numberOfWorkers: 2,
+      role: glueRole.roleArn,
+      glueVersion: '2.0',
+      name: 'AwsGlueEtlSampleCdk',
+      defaultArguments: {
+        '--job-bookmark-option': 'job-bookmark-enable',
+        '--enable-metrics': 'true',
+        '--enable-continuous-cloudwatch-log': 'true',
+        '--DATABASE_NAME': databaseName,
+        '--TABLE_NAME': tableName,
+        '--OUTPUT_BUCKET': 'appflow-test-ash',
+        '--OUTPUT_PATH': '/glue/data/customers_database/customers_json/',
+      },
+      timeout: 60 * 24,
+      workerType: 'G.2X'
+    });
 
   }
 }
