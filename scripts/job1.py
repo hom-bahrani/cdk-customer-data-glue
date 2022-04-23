@@ -25,11 +25,11 @@ customer_df = customer_frame.toDF()
 customer_df = customer_df.where("customerid is NOT NULL")
 
 # Remove the namestyle column
-customer_df.drop('namestyle')
+customer_df = customer_df.drop('namestyle')
 
 customer_frame = DynamicFrame.fromDF(customer_df, glueContext, "customer")
 
 # write output to S3
-glueContext.write_dynamic_frame.from_options(frame = customer_frame, connection_type = "s3", connection_options = {"path": output_dir}, format = "json")
+glueContext.write_dynamic_frame.from_options(frame = customer_frame, connection_type = "s3", connection_options = {"path": output_dir}, format = "csv")
 
 job.commit()
