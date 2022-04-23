@@ -33,7 +33,7 @@ export class TddSparkAwsStack extends Stack {
       ]
     }));
 
-    glueRole.addManagedPolicy(ManagedPolicy.fromAwsManagedPolicyName("AWSGlueServiceRole"));
+    glueRole.addManagedPolicy(ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSGlueServiceRole"));
     
     const database = new glue.CfnDatabase(this, 'MyCfnDatabase', {
       // catalogId: `${process.env.ACCOUNT}`,
@@ -62,13 +62,30 @@ export class TddSparkAwsStack extends Stack {
 
     table.node.addDependency(database)
 
+    const scheduleProperty: glue.CfnCrawler.ScheduleProperty = {
+      scheduleExpression: 'cron(*/5 * * * *)',
+    };
+
+    const recrawlPolicyProperty: glue.CfnCrawler.RecrawlPolicyProperty = {
+      recrawlBehavior: 'CRAWL_NEW_FOLDERS_ONLY',
+    };
+
     const crawler = new glue.CfnCrawler(this, 'MyCfnCrawler', {
+      name: 'customer_test_crawler',
+      description: 'A demo glue crawler',
+      // schedule: scheduleProperty, TODO: Running on demand for now
+      recrawlPolicy: recrawlPolicyProperty,
       role: glueRole.roleArn,
+      databaseName: databaseName,
       targets: {
-        catalogTargets: [{
-          databaseName: 'databaseName',
-          tables: [ 'test_customer_csv' ],
-        }]
+        s3Targets: [{
+          // connectionName: 'test_connection',
+          // dlqEventQueueArn: 'dlqEventQueueArn',
+          // eventQueueArn: 'eventQueueArn',
+          // exclusions: ['exclusions'],
+          path: 's3://appflow-test-ash/glue/data/customers_database/customers_csv/',
+          // sampleSize: 123,
+        }],
       },
       schemaChangePolicy: {
         deleteBehavior: 'LOG',
